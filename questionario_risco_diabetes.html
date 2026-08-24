@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Avaliação de Risco — Unimed Vale do Sepotuba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde-900:#00472B;
+    --verde-700:#00663D;
+    --verde-600:#00854F;
+    --verde-500:#00995D;
+    --verde-100:#E4F5EC;
+    --menta:#F4FAF7;
+    --tinta:#122B22;
+    --tinta-suave:#4B6259;
+    --linha:#D8E9E1;
+    --branco:#FFFFFF;
+    --ambar:#C98A1E;
+    --laranja:#D9711F;
+    --vermelho:#C1352B;
+    --sombra: 0 12px 32px -16px rgba(0,71,43,0.28);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--menta);
+    font-family:'Inter',sans-serif;
+    color:var(--tinta);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:0;
+  }
+  .app{
+    width:100%;
+    max-width:560px;
+    min-height:100vh;
+    background:var(--branco);
+    display:flex;
+    flex-direction:column;
+    box-shadow: var(--sombra);
+  }
+  @media (min-width:600px){
+    body{padding:28px 16px;}
+    .app{min-height:calc(100vh - 56px); border-radius:22px; overflow:hidden;}
+  }
+
+  /* Cabeçalho */
+  header.topo{
+    background: linear-gradient(135deg, var(--verde-900), var(--verde-600));
+    color:#fff;
+    padding:22px 24px 18px;
+    position:relative;
+  }
+  header.topo .marca{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Manrope',sans-serif; font-weight:800; font-size:14px;
+    letter-spacing:.02em;
+    opacity:.92;
+  }
+  header.topo .marca .pinta{width:8px;height:8px;border-radius:50%;background:#fff;display:inline-block;}
+  header.topo h1{
+    font-family:'Manrope',sans-serif;
+    font-size:20px; font-weight:800; margin:10px 0 4px; line-height:1.25;
+  }
+  header.topo p{margin:0; font-size:13px; color:#DCEFE5; line-height:1.5;}
+
+  .barra-progresso{
+    height:4px; background:rgba(255,255,255,.22);
+    position:relative; overflow:hidden;
+  }
+  .barra-progresso > div{
+    height:100%; background:#fff;
+    transition:width .35s ease;
+  }
+
+  main{flex:1; display:flex; flex-direction:column;}
+  .tela{
+    padding:28px 24px 24px;
+    display:none;
+    flex-direction:column;
+    gap:18px;
+    flex:1;
+    animation: entra .28s ease;
+  }
+  .tela.ativa{display:flex;}
+  @keyframes entra{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .eyebrow{
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:11.5px;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--verde-600);
+  }
+  .pergunta{
+    font-family:'Manrope',sans-serif; font-weight:800; font-size:19px;
+    line-height:1.35; color:var(--verde-900); margin:0;
+  }
+  .ajuda{font-size:13.5px; color:var(--tinta-suave); line-height:1.5; margin:0;}
+
+  .campo{display:flex; flex-direction:column; gap:6px;}
+  .campo label{font-size:12.5px; font-weight:600; color:var(--tinta-suave);}
+  .campo input, .campo select{
+    border:1.5px solid var(--linha);
+    border-radius:12px;
+    padding:13px 14px;
+    font-size:16px;
+    font-family:'Inter',sans-serif;
+    background:var(--menta);
+    color:var(--tinta);
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+    width:100%;
+  }
+  .campo input:focus, .campo select:focus{
+    border-color:var(--verde-500);
+    background:#fff;
+  }
+  .linha-dupla{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  .opcoes{display:flex; flex-direction:column; gap:10px;}
+  .opcao{
+    border:1.5px solid var(--linha);
+    border-radius:14px;
+    padding:14px 16px;
+    display:flex; align-items:center; gap:12px;
+    cursor:pointer;
+    background:#fff;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .opcao:hover{border-color:var(--verde-500);}
+  .opcao.selecionada{
+    border-color:var(--verde-600);
+    background:var(--verde-100);
+  }
+  .opcao .marcador{
+    width:19px; height:19px; border-radius:50%;
+    border:1.5px solid #B9CCC3;
+    flex:none; position:relative;
+  }
+  .opcao.selecionada .marcador{border-color:var(--verde-600);}
+  .opcao.selecionada .marcador::after{
+    content:''; position:absolute; inset:3px; border-radius:50%; background:var(--verde-600);
+  }
+  .opcao .texto{font-size:14.5px; font-weight:600; color:var(--tinta); line-height:1.4;}
+  .opcao .texto small{display:block; font-weight:400; color:var(--tinta-suave); font-size:12.5px; margin-top:2px;}
+
+  .erro{font-size:12.5px; color:var(--vermelho); font-weight:600; display:none;}
+
+  .rodape-nav{
+    padding:16px 24px 24px;
+    display:flex; gap:10px;
+    border-top:1px solid var(--linha);
+  }
+  button.botao{
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:15px;
+    border:none; border-radius:12px;
+    padding:14px 18px;
+    cursor:pointer;
+    transition:transform .1s ease, opacity .15s ease;
+  }
+  button.botao:active{transform:scale(.98);}
+  .botao.primario{background:var(--verde-600); color:#fff; flex:1;}
+  .botao.primario:disabled{opacity:.45; cursor:not-allowed;}
+  .botao.secundario{background:var(--menta); color:var(--verde-700); border:1.5px solid var(--linha);}
+  .botao.largo{width:100%;}
+
+  /* Tela inicial */
+  .capa{align-items:flex-start;}
+  .capa .selo{
+    width:52px;height:52px;border-radius:14px;
+    background:var(--verde-100);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--verde-700);
+  }
+  .capa h2{font-family:'Manrope',sans-serif; font-size:23px; font-weight:800; color:var(--verde-900); margin:4px 0 2px;}
+  .capa p{font-size:14.5px; color:var(--tinta-suave); line-height:1.6; margin:0;}
+  .capa .aviso{
+    background:var(--verde-100); border-radius:12px; padding:13px 15px;
+    font-size:12.5px; color:var(--verde-900); line-height:1.55;
+  }
+
+  /* Tela de resultado */
+  .resultado{padding:26px 24px 30px; gap:22px;}
+  .gauge-wrap{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .gauge-legenda{font-size:12px; color:var(--tinta-suave); text-align:center;}
+  .gauge-numero{font-family:'Manrope',sans-serif; font-weight:800; font-size:15px;}
+  .faixa-risco{
+    font-family:'Manrope',sans-serif; font-weight:800; font-size:20px;
+    text-align:center; margin:0;
+  }
+  .faixa-desc{font-size:13px; text-align:center; color:var(--tinta-suave); margin:0 0 4px;}
+
+  .grade-metricas{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .metrica{
+    background:var(--menta); border:1px solid var(--linha); border-radius:14px;
+    padding:14px 15px;
+  }
+  .metrica .rotulo{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--tinta-suave);}
+  .metrica .valor{font-family:'Manrope',sans-serif; font-weight:800; font-size:19px; color:var(--verde-900); margin-top:3px;}
+  .metrica .classe{font-size:12px; color:var(--tinta-suave); margin-top:1px;}
+
+  .bloco-nota{
+    background:#FFF7EA; border:1px solid #F0DEB2; border-radius:12px;
+    padding:13px 15px; font-size:12.5px; color:#6B4E10; line-height:1.55;
+  }
+  .status-envio{font-size:12.5px; text-align:center; color:var(--tinta-suave);}
+  .status-envio.ok{color:var(--verde-700); font-weight:600;}
+  .status-envio.falha{color:var(--vermelho); font-weight:600;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topo">
+    <div class="marca"><span class="pinta"></span> UNIMED VALE DO SEPOTUBA</div>
+    <h1 id="tituloTopo">Avaliação de Risco de Diabetes Tipo 2</h1>
+    <p id="subTopo">Questionário rápido e anônimo para fins estatísticos</p>
+  </header>
+  <div class="barra-progresso"><div id="barraFill" style="width:0%"></div></div>
+
+  <main id="main">
+
+    <!-- 0: Capa -->
+    <section class="tela ativa capa" data-tela="0">
+      <div class="selo">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7.2-4.6-9.7-9C.6 8.4 2 4.6 5.6 3.7c2-.5 3.9.2 5.1 1.7l1.3 1.6 1.3-1.6c1.2-1.5 3.1-2.2 5.1-1.7 3.6.9 5 4.7 3.3 8.3-2.5 4.4-9.7 9-9.7 9z" fill="#00854F"/></svg>
+      </div>
+      <h2>Vamos avaliar seu risco em poucos minutos</h2>
+      <p>Este formulário reúne 8 perguntas simples, baseadas em um questionário validado de rastreamento de risco de diabetes. Ao final, você vê seu resultado individual na tela.</p>
+      <div class="aviso">Seus dados são enviados de forma sigilosa para uma base estatística do estudo. O resultado apresentado tem caráter educativo e não substitui avaliação médica.</div>
+      <button class="botao primario largo" onclick="irPara(1)">Começar avaliação</button>
+    </section>
+
+    <!-- 1: Dados pessoais -->
+    <section class="tela" data-tela="1">
+      <div class="eyebrow">Etapa 1 de 8</div>
+      <h2 class="pergunta">Alguns dados sobre você</h2>
+      <p class="ajuda">Usamos idade, peso e altura para calcular automaticamente seu IMC.</p>
+      <div class="campo">
+        <label for="nome">Nome (opcional)</label>
+        <input type="text" id="nome" placeholder="Se preferir, deixe em branco">
+      </div>
+      <div class="linha-dupla">
+        <div class="campo">
+          <label for="idade">Idade (anos)</label>
+          <input type="number" id="idade" min="1" max="120" inputmode="numeric" placeholder="Ex.: 52">
+        </div>
+        <div class="campo">
+          <label for="sexo">Sexo biológico</label>
+          <select id="sexo">
+            <option value="">Selecione</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+          </select>
+        </div>
+      </div>
+      <div class="linha-dupla">
+        <div class="campo">
+          <label for="peso">Peso (kg)</label>
+          <input type="number" id="peso" min="20" max="300" step="0.1" inputmode="decimal" placeholder="Ex.: 78,5">
+        </div>
+        <div class="campo">
+          <label for="altura">Altura (cm)</label>
+          <input type="number" id="altura" min="100" max="230" step="1" inputmode="numeric" placeholder="Ex.: 170">
+        </div>
+      </div>
+      <div class="erro" id="erro1">Preencha todos os campos com valores válidos para continuar.</div>
+    </section>
+
+    <!-- 2: Cintura -->
+    <section class="tela" data-tela="2">
+      <div class="eyebrow">Etapa 2 de 8</div>
+      <h2 class="pergunta">Circunferência da cintura</h2>
+      <p class="ajuda">Meça na altura do umbigo, com a fita métrica firme mas sem apertar.</p>
+      <div class="campo">
+        <label for="cintura">Circunferência (cm)</label>
+        <input type="number" id="cintura" min="40" max="200" step="0.5" inputmode="decimal" placeholder="Ex.: 96">
+      </div>
+      <div class="erro" id="erro2">Informe a medida da cintura em centímetros.</div>
+    </section>
+
+    <!-- 3: Atividade física -->
+    <section class="tela" data-tela="3">
+      <div class="eyebrow">Etapa 3 de 8</div>
+      <h2 class="pergunta">Você pratica atividade física?</h2>
+      <p class="ajuda">Considere ao menos 30 minutos diários, na maioria dos dias da semana.</p>
+      <div class="opcoes" data-grupo="atividade">
+        <div class="opcao" data-valor="Sim"><span class="marcador"></span><span class="texto">Sim, pratico regularmente<small>Ao final, também calculamos seu índice de massa magra estimado</small></span></div>
+        <div class="opcao" data-valor="Não"><span class="marcador"></span><span class="texto">Não pratico</span></div>
+      </div>
+      <div class="erro" id="erro3">Selecione uma opção para continuar.</div>
+    </section>
+
+    <!-- 4: Frutas/verduras -->
+    <section class="tela" data-tela="4">
+      <div class="eyebrow">Etapa 4 de 8</div>
+      <h2 class="pergunta">Com que frequência você consome frutas, verduras ou legumes?</h2>
+      <div class="opcoes" data-grupo="frutas">
+        <div class="opcao" data-valor="Todos os dias"><span class="marcador"></span><span class="texto">Todos os dias</span></div>
+        <div class="opcao" data-valor="Não todos os dias"><span class="marcador"></span><span class="texto">Não todos os dias</span></div>
+      </div>
+      <div class="erro" id="erro4">Selecione uma opção para continuar.</div>
+    </section>
+
+    <!-- 5: Medicação pressão -->
+    <section class="tela" data-tela="5">
+      <div class="eyebrow">Etapa 5 de 8</div>
+      <h2 class="pergunta">Você usa medicação para pressão alta?</h2>
+      <div class="opcoes" data-grupo="medicacao">
+        <div class="opcao" data-valor="Não"><span class="marcador"></span><span class="texto">Não</span></div>
+        <div class="opcao" data-valor="Sim"><span class="marcador"></span><span class="texto">Sim</span></div>
+      </div>
+      <div class="erro" id="erro5">Selecione uma opção para continuar.</div>
+    </section>
+
+    <!-- 6: Glicose alta -->
+    <section class="tela" data-tela="6">
+      <div class="eyebrow">Etapa 6 de 8</div>
+      <h2 class="pergunta">Já teve glicose alta em exames de sangue ou durante gravidez?</h2>
+      <div class="opcoes" data-grupo="glicose">
+        <div class="opcao" data-valor="Não"><span class="marcador"></span><span class="texto">Não</span></div>
+        <div class="opcao" data-valor="Sim"><span class="marcador"></span><span class="texto">Sim</span></div>
+      </div>
+      <div class="erro" id="erro6">Selecione uma opção para continuar.</div>
+    </section>
+
+    <!-- 7: Histórico familiar -->
+    <section class="tela" data-tela="7">
+      <div class="eyebrow">Etapa 7 de 8</div>
+      <h2 class="pergunta">Histórico familiar de diabetes</h2>
+      <div class="opcoes" data-grupo="historico">
+        <div class="opcao" data-valor="Não"><span class="marcador"></span><span class="texto">Não há casos na família</span></div>
+        <div class="opcao" data-valor="Grau2"><span class="marcador"></span><span class="texto">Sim<small>Avós, tios ou primos de 1º grau</small></span></div>
+        <div class="opcao" data-valor="Grau1"><span class="marcador"></span><span class="texto">Sim<small>Pais, irmãos ou filhos</small></span></div>
+      </div>
+      <div class="erro" id="erro7">Selecione uma opção para continuar.</div>
+    </section>
+
+    <!-- 8: Revisão antes de enviar -->
+    <section class="tela" data-tela="8">
+      <div class="eyebrow">Última etapa</div>
+      <h2 class="pergunta">Tudo pronto para calcular seu resultado</h2>
+      <p class="ajuda">Ao confirmar, calculamos seu IMC, sua pontuação de risco e registramos suas respostas na base estatística do estudo.</p>
+      <div class="erro" id="erroEnvio">Não foi possível enviar agora. Você pode ver seu resultado normalmente; tente reenviar mais tarde se estiver sem conexão.</div>
+    </section>
+
+    <!-- 9: Resultado -->
+    <section class="tela resultado" data-tela="9">
+      <div class="eyebrow" style="text-align:center;">Seu resultado</div>
+      <div class="gauge-wrap">
+        <div id="gaugeSvgHolder"></div>
+        <div class="gauge-numero" id="pontuacaoTexto">0 pontos</div>
+      </div>
+      <div>
+        <p class="faixa-risco" id="faixaRisco">—</p>
+        <p class="faixa-desc" id="faixaDesc">—</p>
+      </div>
+      <div class="grade-metricas">
+        <div class="metrica">
+          <div class="rotulo">IMC</div>
+          <div class="valor" id="imcValor">—</div>
+          <div class="classe" id="imcClasse">—</div>
+        </div>
+        <div class="metrica" id="cardCintura">
+          <div class="rotulo">Cintura</div>
+          <div class="valor" id="cinturaValor">—</div>
+          <div class="classe" id="cinturaClasse">—</div>
+        </div>
+        <div class="metrica" id="cardMassaMagra" style="display:none;">
+          <div class="rotulo">Índice de massa magra</div>
+          <div class="valor" id="imlgValor">—</div>
+          <div class="classe" id="imlgClasse">estimativa</div>
+        </div>
+        <div class="metrica" id="cardGordura" style="display:none;">
+          <div class="rotulo">% de gordura estimado</div>
+          <div class="valor" id="gorduraValor">—</div>
+          <div class="classe">fórmula de Deurenberg</div>
+        </div>
+      </div>
+      <div class="bloco-nota">Este resultado é uma estimativa educativa baseada nas respostas informadas. Não substitui exames laboratoriais nem avaliação médica ou nutricional presencial.</div>
+      <div class="status-envio" id="statusEnvio">Enviando suas respostas para a base do estudo…</div>
+    </section>
+
+  </main>
+
+  <div class="rodape-nav" id="navRodape">
+    <button class="botao secundario" id="btnVoltar" onclick="voltar()">Voltar</button>
+    <button class="botao primario" id="btnAvancar" onclick="avancar()">Continuar</button>
+  </div>
+
+</div>
+
+<script>
+/* ======================= CONFIGURAÇÃO ======================= */
+// Cole aqui a URL do seu Web App do Google Apps Script (Passo de implantação abaixo)
+const SCRIPT_URL = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
+
+/* ======================= ESTADO ======================= */
+const totalEtapas = 9; // telas 1 a 9 contam pontos de progresso (0 é a capa)
+let etapaAtual = 0;
+const respostas = {
+  nome:'', idade:null, sexo:'', peso:null, altura:null, cintura:null,
+  atividade:'', frutas:'', medicacao:'', glicose:'', historico:''
+};
+
+const telas = document.querySelectorAll('.tela');
+const barraFill = document.getElementById('barraFill');
+const btnVoltar = document.getElementById('btnVoltar');
+const btnAvancar = document.getElementById('btnAvancar');
+
+/* Seleção de opções (radio customizado) */
+document.querySelectorAll('.opcoes').forEach(grupo => {
+  grupo.querySelectorAll('.opcao').forEach(op => {
+    op.addEventListener('click', () => {
+      grupo.querySelectorAll('.opcao').forEach(o => o.classList.remove('selecionada'));
+      op.classList.add('selecionada');
+      respostas[grupo.dataset.grupo] = op.dataset.valor;
+      esconderErro(etapaAtual);
+    });
+  });
+});
+
+function irPara(n){
+  telas.forEach(t => t.classList.remove('ativa'));
+  document.querySelector(`.tela[data-tela="${n}"]`).classList.add('ativa');
+  etapaAtual = n;
+  barraFill.style.width = Math.min(100, (n/9)*100) + '%';
+  atualizarRodape();
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function atualizarRodape(){
+  const nav = document.getElementById('navRodape');
+  if(etapaAtual === 0 || etapaAtual === 9){
+    nav.style.display = 'none';
+  } else {
+    nav.style.display = 'flex';
+    btnVoltar.style.display = etapaAtual === 1 ? 'none' : 'inline-flex';
+    btnAvancar.textContent = etapaAtual === 8 ? 'Ver meu resultado' : 'Continuar';
+  }
+}
+
+function esconderErro(n){
+  const el = document.getElementById('erro'+n);
+  if(el) el.style.display = 'none';
+}
+function mostrarErro(n){
+  const el = document.getElementById('erro'+n);
+  if(el) el.style.display = 'block';
+}
+
+function validarEtapa(n){
+  if(n === 1){
+    const idade = document.getElementById('idade').value;
+    const sexo = document.getElementById('sexo').value;
+    const peso = document.getElementById('peso').value;
+    const altura = document.getElementById('altura').value;
+    if(!idade || !sexo || !peso || !altura || idade <= 0 || peso <= 0 || altura <= 0){
+      mostrarErro(1); return false;
+    }
+    respostas.nome = document.getElementById('nome').value.trim();
+    respostas.idade = parseFloat(idade);
+    respostas.sexo = sexo;
+    respostas.peso = parseFloat(peso.toString().replace(',','.'));
+    respostas.altura = parseFloat(altura);
+    return true;
+  }
+  if(n === 2){
+    const cintura = document.getElementById('cintura').value;
+    if(!cintura || cintura <= 0){ mostrarErro(2); return false; }
+    respostas.cintura = parseFloat(cintura.toString().replace(',','.'));
+    return true;
+  }
+  if(n === 3){ if(!respostas.atividade){ mostrarErro(3); return false; } return true; }
+  if(n === 4){ if(!respostas.frutas){ mostrarErro(4); return false; } return true; }
+  if(n === 5){ if(!respostas.medicacao){ mostrarErro(5); return false; } return true; }
+  if(n === 6){ if(!respostas.glicose){ mostrarErro(6); return false; } return true; }
+  if(n === 7){ if(!respostas.historico){ mostrarErro(7); return false; } return true; }
+  return true;
+}
+
+function avancar(){
+  if(!validarEtapa(etapaAtual)) return;
+  if(etapaAtual === 8){
+    calcularEEnviar();
+    irPara(9);
+    return;
+  }
+  irPara(etapaAtual + 1);
+}
+function voltar(){
+  if(etapaAtual > 1) irPara(etapaAtual - 1);
+}
+
+/* ======================= CÁLCULOS ======================= */
+function pontosIdade(idade){
+  if(idade < 45) return 0;
+  if(idade <= 54) return 2;
+  if(idade <= 64) return 3;
+  return 4;
+}
+function calcularIMC(peso, alturaCm){
+  const alturaM = alturaCm / 100;
+  return peso / (alturaM * alturaM);
+}
+function pontosIMC(imc){
+  if(imc < 25) return 0;
+  if(imc <= 30) return 1;
+  return 3;
+}
+function classeIMC(imc){
+  if(imc < 18.5) return 'Abaixo do peso';
+  if(imc < 25) return 'Peso adequado';
+  if(imc < 30) return 'Sobrepeso';
+  if(imc < 35) return 'Obesidade grau I';
+  if(imc < 40) return 'Obesidade grau II';
+  return 'Obesidade grau III';
+}
+function pontosCintura(cintura, sexo){
+  if(sexo === 'M'){
+    if(cintura < 94) return 0;
+    if(cintura <= 102) return 3;
+    return 4;
+  } else {
+    if(cintura < 80) return 0;
+    if(cintura <= 88) return 3;
+    return 4;
+  }
+}
+function classeCintura(cintura, sexo){
+  const p = pontosCintura(cintura, sexo);
+  if(p === 0) return 'Dentro da referência';
+  if(p === 3) return 'Elevada';
+  return 'Muito elevada';
+}
+function pontosAtividade(v){ return v === 'Sim' ? 0 : 2; }
+function pontosFrutas(v){ return v === 'Todos os dias' ? 0 : 1; }
+function pontosMedicacao(v){ return v === 'Sim' ? 2 : 0; }
+function pontosGlicose(v){ return v === 'Sim' ? 5 : 0; }
+function pontosHistorico(v){
+  if(v === 'Grau1') return 5;
+  if(v === 'Grau2') return 3;
+  return 0;
+}
+function classificarRisco(total){
+  if(total < 7) return {faixa:'Risco baixo', desc:'Probabilidade estimada de aproximadamente 1 em cada 100 pessoas desenvolver diabetes tipo 2 em 10 anos.', cor:'var(--verde-600)'};
+  if(total <= 11) return {faixa:'Risco levemente elevado', desc:'Probabilidade estimada de aproximadamente 1 em cada 25 pessoas.', cor:'#7BA632'};
+  if(total <= 14) return {faixa:'Risco moderado', desc:'Probabilidade estimada de aproximadamente 1 em cada 6 pessoas.', cor:'var(--ambar)'};
+  if(total <= 20) return {faixa:'Risco alto', desc:'Probabilidade estimada de aproximadamente 1 em cada 3 pessoas.', cor:'var(--laranja)'};
+  return {faixa:'Risco muito alto', desc:'Probabilidade estimada de aproximadamente 1 em cada 2 pessoas.', cor:'var(--vermelho)'};
+}
+
+// Estimativa de % de gordura corporal — fórmula de Deurenberg (1991), a partir de IMC, idade e sexo
+function estimarGordura(imc, idade, sexo){
+  const s = sexo === 'M' ? 1 : 0;
+  return (1.20 * imc) + (0.23 * idade) - (10.8 * s) - 5.4;
+}
+function classeIMLG(imlg, sexo){
+  // Faixas de referência aproximadas de índice de massa magra (kg/m²)
+  if(sexo === 'M'){
+    if(imlg < 16.7) return 'Abaixo da referência';
+    if(imlg <= 19.8) return 'Dentro da referência';
+    return 'Acima da referência';
+  } else {
+    if(imlg < 14.6) return 'Abaixo da referência';
+    if(imlg <= 16.8) return 'Dentro da referência';
+    return 'Acima da referência';
+  }
+}
+
+let ultimoResultado = null;
+
+function calcularEEnviar(){
+  const imc = calcularIMC(respostas.peso, respostas.altura);
+  const ptsIdade = pontosIdade(respostas.idade);
+  const ptsIMC = pontosIMC(imc);
+  const ptsCintura = pontosCintura(respostas.cintura, respostas.sexo);
+  const ptsAtiv = pontosAtividade(respostas.atividade);
+  const ptsFrutas = pontosFrutas(respostas.frutas);
+  const ptsMed = pontosMedicacao(respostas.medicacao);
+  const ptsGli = pontosGlicose(respostas.glicose);
+  const ptsHist = pontosHistorico(respostas.historico);
+  const total = ptsIdade + ptsIMC + ptsCintura + ptsAtiv + ptsFrutas + ptsMed + ptsGli + ptsHist;
+  const risco = classificarRisco(total);
+
+  let gorduraPct = null, massaMagraKg = null, imlg = null;
+  if(respostas.atividade === 'Sim'){
+    gorduraPct = estimarGordura(imc, respostas.idade, respostas.sexo);
+    gorduraPct = Math.max(3, Math.min(60, gorduraPct)); // limites biológicos plausíveis
+    massaMagraKg = respostas.peso * (1 - gorduraPct/100);
+    imlg = massaMagraKg / Math.pow(respostas.altura/100, 2);
+  }
+
+  ultimoResultado = {
+    timestamp: new Date().toISOString(),
+    nome: respostas.nome,
+    idade: respostas.idade,
+    sexo: respostas.sexo,
+    peso_kg: respostas.peso,
+    altura_cm: respostas.altura,
+    imc: Number(imc.toFixed(1)),
+    imc_classificacao: classeIMC(imc),
+    cintura_cm: respostas.cintura,
+    cintura_classificacao: classeCintura(respostas.cintura, respostas.sexo),
+    pratica_atividade_fisica: respostas.atividade,
+    consumo_frutas_verduras: respostas.frutas,
+    usa_medicacao_pressao: respostas.medicacao,
+    ja_teve_glicose_alta: respostas.glicose,
+    historico_familiar_diabetes: respostas.historico === 'Grau1' ? 'Pais, irmãos ou filhos' : (respostas.historico === 'Grau2' ? 'Avós, tios ou primos de 1º grau' : 'Não'),
+    pontos_idade: ptsIdade,
+    pontos_imc: ptsIMC,
+    pontos_cintura: ptsCintura,
+    pontos_atividade: ptsAtiv,
+    pontos_frutas: ptsFrutas,
+    pontos_medicacao: ptsMed,
+    pontos_glicose: ptsGli,
+    pontos_historico: ptsHist,
+    pontuacao_total: total,
+    classificacao_risco: risco.faixa,
+    percentual_gordura_estimado: gorduraPct !== null ? Number(gorduraPct.toFixed(1)) : '',
+    massa_magra_kg: massaMagraKg !== null ? Number(massaMagraKg.toFixed(1)) : '',
+    indice_massa_magra: imlg !== null ? Number(imlg.toFixed(1)) : ''
+  };
+
+  renderizarResultado(total, risco, imc, imlg, gorduraPct);
+  enviarParaSheets(ultimoResultado);
+}
+
+/* ======================= RENDER RESULTADO ======================= */
+function desenharGauge(total, risco){
+  // gauge semicircular de 0 a 26 pontos (máximo teórico da pontuação)
+  const max = 26;
+  const pct = Math.max(0, Math.min(1, total / max));
+  const angulo = -90 + pct * 180; // -90 a 90 graus
+  const r = 84, cx = 100, cy = 100;
+  const rad = (deg) => (deg * Math.PI/180);
+  const agulhaX = cx + (r-14) * Math.cos(rad(angulo - 90));
+  const agulhaY = cy + (r-14) * Math.sin(rad(angulo - 90));
+
+  const svg = `
+  <svg width="220" height="130" viewBox="0 0 200 115">
+    <path d="M 16 100 A 84 84 0 0 1 62 22" stroke="#00995D" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M 62 22 A 84 84 0 0 1 100 16" stroke="#7BA632" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M 100 16 A 84 84 0 0 1 138 22" stroke="#C98A1E" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M 138 22 A 84 84 0 0 1 175 55" stroke="#D9711F" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M 175 55 A 84 84 0 0 1 184 100" stroke="#C1352B" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <line x1="${cx}" y1="${cy}" x2="${agulhaX}" y2="${agulhaY}" stroke="#122B22" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="#122B22"/>
+  </svg>`;
+  document.getElementById('gaugeSvgHolder').innerHTML = svg;
+}
+
+function renderizarResultado(total, risco, imc, imlg, gorduraPct){
+  desenharGauge(total, risco);
+  document.getElementById('pontuacaoTexto').textContent = total + ' pontos';
+  const faixaEl = document.getElementById('faixaRisco');
+  faixaEl.textContent = risco.faixa;
+  faixaEl.style.color = risco.cor;
+  document.getElementById('faixaDesc').textContent = risco.desc;
+
+  document.getElementById('imcValor').textContent = imc.toFixed(1);
+  document.getElementById('imcClasse').textContent = classeIMC(imc);
+  document.getElementById('cinturaValor').textContent = respostas.cintura + ' cm';
+  document.getElementById('cinturaClasse').textContent = classeCintura(respostas.cintura, respostas.sexo);
+
+  if(imlg !== null){
+    document.getElementById('cardMassaMagra').style.display = 'block';
+    document.getElementById('cardGordura').style.display = 'block';
+    document.getElementById('imlgValor').textContent = imlg.toFixed(1) + ' kg/m²';
+    document.getElementById('imlgClasse').textContent = classeIMLG(imlg, respostas.sexo);
+    document.getElementById('gorduraValor').textContent = gorduraPct.toFixed(1) + '%';
+  }
+}
+
+/* ======================= ENVIO AO GOOGLE SHEETS ======================= */
+function enviarParaSheets(dados){
+  const statusEl = document.getElementById('statusEnvio');
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf('COLE_AQUI') !== -1){
+    statusEl.textContent = 'Configuração pendente: cole a URL do Apps Script no arquivo antes de publicar.';
+    statusEl.className = 'status-envio falha';
+    return;
+  }
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' }, // evita preflight CORS
+    body: JSON.stringify(dados)
+  })
+  .then(r => r.text())
+  .then(() => {
+    statusEl.textContent = 'Respostas registradas com sucesso. Obrigado por participar!';
+    statusEl.className = 'status-envio ok';
+  })
+  .catch(() => {
+    statusEl.textContent = 'Não foi possível confirmar o envio (verifique sua conexão).';
+    statusEl.className = 'status-envio falha';
+  });
+}
+</script>
+</body>
+</html>
