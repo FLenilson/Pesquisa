@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Avaliação de Risco — Unimed Vale do Sepotuba</title>
+<title>Pesquisa de Risco de Diabetes Tipo 2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -205,16 +205,31 @@
     background:#FFF7EA; border:1px solid #F0DEB2; border-radius:12px;
     padding:13px 15px; font-size:12.5px; color:#6B4E10; line-height:1.55;
   }
-  .status-envio{font-size:12.5px; text-align:center; color:var(--tinta-suave);}
-  .status-envio.ok{color:var(--verde-700); font-weight:600;}
-  .status-envio.falha{color:var(--vermelho); font-weight:600;}
+  .nota-atleta{
+    background:var(--verde-100); border:1px solid #BFE3D2; border-radius:12px;
+    padding:13px 15px; font-size:12.5px; color:var(--verde-900); line-height:1.55;
+    display:none;
+  }
+
+  .acoes-resultado{display:flex; gap:10px; margin-top:4px;}
+  .cabecalho-impressao{display:none;}
+
+  @media print{
+    body{background:#fff;}
+    body *{visibility:hidden;}
+    #areaImprimir, #areaImprimir *{visibility:visible;}
+    #areaImprimir{position:absolute; left:0; top:0; width:100%; padding:12px 6px;}
+    .cabecalho-impressao{display:block; margin-bottom:14px;}
+    .cabecalho-impressao .ci-titulo{font-family:'Manrope',sans-serif; font-weight:800; font-size:16px; color:var(--verde-900); margin:0 0 4px;}
+    .cabecalho-impressao .ci-sub{font-size:12px; color:var(--tinta-suave); margin:0;}
+  }
 </style>
 </head>
 <body>
 <div class="app">
 
   <header class="topo">
-    <div class="marca"><span class="pinta"></span> UNIMED VALE DO SEPOTUBA</div>
+    <div class="marca"><span class="pinta"></span> PESQUISA CIENTÍFICA</div>
     <h1 id="tituloTopo">Avaliação de Risco de Diabetes Tipo 2</h1>
     <p id="subTopo">Questionário rápido e anônimo para fins estatísticos</p>
   </header>
@@ -287,8 +302,13 @@
       <h2 class="pergunta">Você pratica atividade física?</h2>
       <p class="ajuda">Considere ao menos 30 minutos diários, na maioria dos dias da semana.</p>
       <div class="opcoes" data-grupo="atividade">
-        <div class="opcao" data-valor="Sim"><span class="marcador"></span><span class="texto">Sim, pratico regularmente<small>Ao final, também calculamos seu índice de massa magra estimado</small></span></div>
+        <div class="opcao" data-valor="Sim"><span class="marcador"></span><span class="texto">Sim, pratico regularmente<small>Ao final, também calculamos seu índice de massa magra</small></span></div>
         <div class="opcao" data-valor="Não"><span class="marcador"></span><span class="texto">Não pratico</span></div>
+      </div>
+      <div class="campo" id="campoGorduraMedida" style="display:none;">
+        <label for="gorduraMedida">Se você já sabe (opcional): percentual de gordura corporal medido</label>
+        <input type="number" id="gorduraMedida" min="3" max="60" step="0.1" inputmode="decimal" placeholder="Ex.: 12 — de bioimpedância, dobras cutâneas ou exame">
+        <p class="ajuda" style="margin:0;">Se você não souber, deixe em branco — nesse caso fazemos uma estimativa aproximada, que pode ser menos precisa para quem tem bastante massa muscular.</p>
       </div>
       <div class="erro" id="erro3">Selecione uma opção para continuar.</div>
     </section>
@@ -296,7 +316,7 @@
     <!-- 4: Frutas/verduras -->
     <section class="tela" data-tela="4">
       <div class="eyebrow">Etapa 4 de 8</div>
-      <h2 class="pergunta">Com que frequência você consome frutas, verduras ou legumes?</h2>
+      <h2 class="pergunta">Com que frequência você come legumes, verduras, frutas ou grãos?</h2>
       <div class="opcoes" data-grupo="frutas">
         <div class="opcao" data-valor="Todos os dias"><span class="marcador"></span><span class="texto">Todos os dias</span></div>
         <div class="opcao" data-valor="Não todos os dias"><span class="marcador"></span><span class="texto">Não todos os dias</span></div>
@@ -348,39 +368,49 @@
 
     <!-- 9: Resultado -->
     <section class="tela resultado" data-tela="9">
-      <div class="eyebrow" style="text-align:center;">Seu resultado</div>
-      <div class="gauge-wrap">
-        <div id="gaugeSvgHolder"></div>
-        <div class="gauge-numero" id="pontuacaoTexto">0 pontos</div>
+      <div id="areaImprimir">
+        <div class="cabecalho-impressao" id="cabecalhoImpressao">
+          <p class="ci-titulo">Resultado da Avaliação de Risco de Diabetes Tipo 2</p>
+          <p class="ci-sub" id="ciSub">—</p>
+        </div>
+        <div class="eyebrow" style="text-align:center;">Seu resultado</div>
+        <div class="gauge-wrap">
+          <div id="gaugeSvgHolder"></div>
+          <div class="gauge-numero" id="pontuacaoTexto">0 pontos</div>
+        </div>
+        <div>
+          <p class="faixa-risco" id="faixaRisco">—</p>
+          <p class="faixa-desc" id="faixaDesc">—</p>
+        </div>
+        <div class="grade-metricas">
+          <div class="metrica">
+            <div class="rotulo">IMC</div>
+            <div class="valor" id="imcValor">—</div>
+            <div class="classe" id="imcClasse">—</div>
+          </div>
+          <div class="metrica" id="cardCintura">
+            <div class="rotulo">Cintura</div>
+            <div class="valor" id="cinturaValor">—</div>
+            <div class="classe" id="cinturaClasse">—</div>
+          </div>
+          <div class="metrica" id="cardMassaMagra" style="display:none;">
+            <div class="rotulo">Índice de massa magra</div>
+            <div class="valor" id="imlgValor">—</div>
+            <div class="classe" id="imlgClasse">estimativa</div>
+          </div>
+          <div class="metrica" id="cardGordura" style="display:none;">
+            <div class="rotulo">% de gordura estimado</div>
+            <div class="valor" id="gorduraValor">—</div>
+            <div class="classe">fórmula de Deurenberg</div>
+          </div>
+        </div>
+        <div class="nota-atleta" id="notaAtleta">Como você pratica atividade física regularmente, parte do seu peso pode vir de massa muscular. O IMC não diferencia músculo de gordura, então a pontuação de risco relacionada ao IMC pode estar superestimando seu risco real. Por isso mostramos também seu índice de massa magra e % de gordura estimados abaixo, como referência complementar — a pontuação total do questionário não é alterada por eles.</div>
+        <div class="bloco-nota">Este resultado é uma estimativa educativa baseada nas respostas informadas. Não substitui exames laboratoriais nem avaliação médica ou nutricional presencial.</div>
       </div>
-      <div>
-        <p class="faixa-risco" id="faixaRisco">—</p>
-        <p class="faixa-desc" id="faixaDesc">—</p>
+      <div class="acoes-resultado">
+        <button class="botao secundario" onclick="reiniciarPesquisa()">Nova pesquisa</button>
+        <button class="botao primario" onclick="salvarPDF()">Salvar resultado em PDF</button>
       </div>
-      <div class="grade-metricas">
-        <div class="metrica">
-          <div class="rotulo">IMC</div>
-          <div class="valor" id="imcValor">—</div>
-          <div class="classe" id="imcClasse">—</div>
-        </div>
-        <div class="metrica" id="cardCintura">
-          <div class="rotulo">Cintura</div>
-          <div class="valor" id="cinturaValor">—</div>
-          <div class="classe" id="cinturaClasse">—</div>
-        </div>
-        <div class="metrica" id="cardMassaMagra" style="display:none;">
-          <div class="rotulo">Índice de massa magra</div>
-          <div class="valor" id="imlgValor">—</div>
-          <div class="classe" id="imlgClasse">estimativa</div>
-        </div>
-        <div class="metrica" id="cardGordura" style="display:none;">
-          <div class="rotulo">% de gordura estimado</div>
-          <div class="valor" id="gorduraValor">—</div>
-          <div class="classe">fórmula de Deurenberg</div>
-        </div>
-      </div>
-      <div class="bloco-nota">Este resultado é uma estimativa educativa baseada nas respostas informadas. Não substitui exames laboratoriais nem avaliação médica ou nutricional presencial.</div>
-      <div class="status-envio" id="statusEnvio">Enviando suas respostas para a base do estudo…</div>
     </section>
 
   </main>
@@ -418,6 +448,13 @@ document.querySelectorAll('.opcoes').forEach(grupo => {
       op.classList.add('selecionada');
       respostas[grupo.dataset.grupo] = op.dataset.valor;
       esconderErro(etapaAtual);
+
+      // Mostra o campo de %gordura medido só quando a pessoa diz que pratica atividade física
+      if(grupo.dataset.grupo === 'atividade'){
+        const campo = document.getElementById('campoGorduraMedida');
+        campo.style.display = (op.dataset.valor === 'Sim') ? 'flex' : 'none';
+        if(op.dataset.valor !== 'Sim') document.getElementById('gorduraMedida').value = '';
+      }
     });
   });
 });
@@ -585,13 +622,26 @@ function calcularEEnviar(){
   const total = ptsIdade + ptsIMC + ptsCintura + ptsAtiv + ptsFrutas + ptsMed + ptsGli + ptsHist;
   const risco = classificarRisco(total);
 
-  let gorduraPct = null, massaMagraKg = null, imlg = null;
+  let gorduraPct = null, massaMagraKg = null, imlg = null, fonteGordura = '';
   if(respostas.atividade === 'Sim'){
-    gorduraPct = estimarGordura(imc, respostas.idade, respostas.sexo);
-    gorduraPct = Math.max(3, Math.min(60, gorduraPct)); // limites biológicos plausíveis
+    const gorduraInformada = document.getElementById('gorduraMedida').value;
+    if(gorduraInformada !== '' && !isNaN(gorduraInformada) && gorduraInformada > 0){
+      // Prioriza o valor real medido (bioimpedância, dobras cutâneas, DEXA etc.) — muito mais
+      // preciso do que qualquer fórmula baseada em IMC para pessoas com bastante massa muscular.
+      gorduraPct = Math.max(3, Math.min(60, parseFloat(gorduraInformada.toString().replace(',','.'))));
+      fonteGordura = 'medido';
+    } else {
+      // Sem valor informado: cai para a estimativa por fórmula (Deurenberg), que é aproximada
+      // e tende a superestimar gordura em pessoas mais musculosas, pois parte só do IMC.
+      gorduraPct = estimarGordura(imc, respostas.idade, respostas.sexo);
+      gorduraPct = Math.max(3, Math.min(60, gorduraPct));
+      fonteGordura = 'estimado';
+    }
     massaMagraKg = respostas.peso * (1 - gorduraPct/100);
     imlg = massaMagraKg / Math.pow(respostas.altura/100, 2);
   }
+
+  respostas.gorduraMedida = document.getElementById('gorduraMedida').value || '';
 
   ultimoResultado = {
     timestamp: new Date().toISOString(),
@@ -619,12 +669,13 @@ function calcularEEnviar(){
     pontos_historico: ptsHist,
     pontuacao_total: total,
     classificacao_risco: risco.faixa,
-    percentual_gordura_estimado: gorduraPct !== null ? Number(gorduraPct.toFixed(1)) : '',
+    percentual_gordura: gorduraPct !== null ? Number(gorduraPct.toFixed(1)) : '',
+    fonte_percentual_gordura: fonteGordura,
     massa_magra_kg: massaMagraKg !== null ? Number(massaMagraKg.toFixed(1)) : '',
     indice_massa_magra: imlg !== null ? Number(imlg.toFixed(1)) : ''
   };
 
-  renderizarResultado(total, risco, imc, imlg, gorduraPct);
+  renderizarResultado(total, risco, imc, imlg, gorduraPct, fonteGordura);
   enviarParaSheets(ultimoResultado);
 }
 
@@ -652,7 +703,7 @@ function desenharGauge(total, risco){
   document.getElementById('gaugeSvgHolder').innerHTML = svg;
 }
 
-function renderizarResultado(total, risco, imc, imlg, gorduraPct){
+function renderizarResultado(total, risco, imc, imlg, gorduraPct, fonteGordura){
   desenharGauge(total, risco);
   document.getElementById('pontuacaoTexto').textContent = total + ' pontos';
   const faixaEl = document.getElementById('faixaRisco');
@@ -671,31 +722,71 @@ function renderizarResultado(total, risco, imc, imlg, gorduraPct){
     document.getElementById('imlgValor').textContent = imlg.toFixed(1) + ' kg/m²';
     document.getElementById('imlgClasse').textContent = classeIMLG(imlg, respostas.sexo);
     document.getElementById('gorduraValor').textContent = gorduraPct.toFixed(1) + '%';
+    document.querySelector('#cardGordura .classe').textContent =
+      fonteGordura === 'medido' ? 'valor informado por você' : 'estimativa (fórmula de Deurenberg)';
+  }
+
+  // Aviso informativo: só aparece quando a pessoa é ativa E o IMC já entrou em faixa
+  // que soma pontos (>=25). Não altera nenhuma pontuação, é só contexto para leitura do resultado.
+  const notaEl = document.getElementById('notaAtleta');
+  if(imlg !== null && imc >= 25){
+    notaEl.style.display = 'block';
+    notaEl.textContent = fonteGordura === 'medido'
+      ? 'Como você informou seu percentual de gordura medido, sabemos que parte do seu peso é massa muscular, óssea e outros tecidos magros. A pontuação de IMC do questionário (baseada só em peso e altura) segue calculada conforme o método oficial do FINDRISC, sem alterações — por isso pode não refletir seu risco real com a mesma precisão do seu percentual de gordura medido.'
+      : 'Como você pratica atividade física regularmente, seu peso pode incluir mais massa muscular do que a média. Você não informou seu percentual de gordura medido, então usamos uma estimativa (fórmula de Deurenberg) que tende a superestimar a gordura em pessoas mais musculosas. Se souber seu percentual medido (bioimpedância, dobras cutâneas etc.), volte à pergunta sobre atividade física e informe para um resultado mais preciso.';
+  } else {
+    notaEl.style.display = 'none';
   }
 }
 
 /* ======================= ENVIO AO GOOGLE SHEETS ======================= */
+// Envio silencioso: a pessoa que responde só vê o resultado na tela/PDF.
+// O acesso a todas as respostas fica restrito a quem administra a planilha (o estatístico).
 function enviarParaSheets(dados){
-  const statusEl = document.getElementById('statusEnvio');
   if(!SCRIPT_URL || SCRIPT_URL.indexOf('COLE_AQUI') !== -1){
-    statusEl.textContent = 'Configuração pendente: cole a URL do Apps Script no arquivo antes de publicar.';
-    statusEl.className = 'status-envio falha';
+    console.warn('SCRIPT_URL não configurada — respostas não foram enviadas à planilha.');
     return;
   }
   fetch(SCRIPT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' }, // evita preflight CORS
     body: JSON.stringify(dados)
-  })
-  .then(r => r.text())
-  .then(() => {
-    statusEl.textContent = 'Respostas registradas com sucesso. Obrigado por participar!';
-    statusEl.className = 'status-envio ok';
-  })
-  .catch(() => {
-    statusEl.textContent = 'Não foi possível confirmar o envio (verifique sua conexão).';
-    statusEl.className = 'status-envio falha';
-  });
+  }).catch(() => { /* falha silenciosa: não expõe detalhes técnicos para quem responde */ });
+}
+
+/* ======================= NOVA PESQUISA / SALVAR EM PDF ======================= */
+function reiniciarPesquisa(){
+  // Zera todas as respostas e campos, e volta para a tela inicial
+  Object.keys(respostas).forEach(k => respostas[k] = (k==='nome'?'':null));
+  respostas.sexo = ''; respostas.atividade = ''; respostas.frutas = '';
+  respostas.medicacao = ''; respostas.glicose = ''; respostas.historico = '';
+
+  document.getElementById('nome').value = '';
+  document.getElementById('idade').value = '';
+  document.getElementById('sexo').value = '';
+  document.getElementById('peso').value = '';
+  document.getElementById('altura').value = '';
+  document.getElementById('cintura').value = '';
+  document.getElementById('gorduraMedida').value = '';
+  document.getElementById('campoGorduraMedida').style.display = 'none';
+
+  document.querySelectorAll('.opcao.selecionada').forEach(o => o.classList.remove('selecionada'));
+  document.querySelectorAll('.erro').forEach(e => e.style.display = 'none');
+  document.getElementById('cardMassaMagra').style.display = 'none';
+  document.getElementById('cardGordura').style.display = 'none';
+  document.getElementById('notaAtleta').style.display = 'none';
+
+  ultimoResultado = null;
+  irPara(0);
+}
+
+function salvarPDF(){
+  if(ultimoResultado){
+    const nomeTxt = ultimoResultado.nome ? ultimoResultado.nome : 'Participante';
+    const dataTxt = new Date().toLocaleDateString('pt-BR');
+    document.getElementById('ciSub').textContent = nomeTxt + ' · ' + dataTxt;
+  }
+  window.print();
 }
 </script>
 </body>
